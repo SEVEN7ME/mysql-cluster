@@ -1,0 +1,32 @@
+version: "2"
+services:
+  mysql-master: # 主节点
+    container_name: farm-mysql-master
+    build:
+      context: ./
+      dockerfile: master/Dockerfile
+      target: farm-mysql-master
+    environment:
+      - "MYSQL_ROOT_PASSWORD=root"
+    links:
+      - mysql-slave
+    volumes:
+      - ./mysql-master:/var/lib/mysql
+    ports: # 端口映射
+      - 3306:3306
+    hostname: mysql-master
+  mysql-slave: # 从节点
+    container_name: farm-mysql-slave
+    build:
+      context: ./
+      dockerfile: slave/Dockerfile
+      target: farm-mysql-slave
+    environment:
+      - "MYSQL_ROOT_PASSWORD=root"
+    volumes:
+      - ./mysql-slave:/var/lib/mysql
+    ports: # 端口映射
+      - 3305:3306
+    depends_on:
+      - mysql-master
+    hostname: mysql-slave
